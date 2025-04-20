@@ -1,20 +1,45 @@
-import { env, createExecutionContext, waitOnExecutionContext, SELF } from 'cloudflare:test';
-import { describe, it, expect } from 'vitest';
-import worker from '../src';
+import assert from 'assert';
+globalThis.assert = assert;
 
-describe('Hello World worker', () => {
-	it('responds with Hello World! (unit style)', async () => {
-		const request = new Request('http://example.com');
-		// Create an empty context to pass to `worker.fetch()`.
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
-		// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
-		await waitOnExecutionContext(ctx);
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
-	});
+import { webcrypto } from 'crypto';
+globalThis.crypto = webcrypto;
 
-	it('responds with Hello World! (integration style)', async () => {
-		const response = await SELF.fetch('http://example.com');
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
-	});
+import { describe, it, expect } from "vitest";
+import { Miniflare } from "miniflare";
+
+describe("Worker Proxy", () => {
+  it("should return 400 for missing parameters", async () => {
+    const mf = new Miniflare({
+      scriptPath: "src/index.js",
+      compatibilityDate: "2024-04-20",
+    });
+
+    const res = await mf.dispatchFetch("http://localhost");
+    expect(res.status).toBe(400);
+    const text = await res.text();
+    expect(text).toMatch(/Missing parameters/);
+  });
+
+  it("should return success from proxy call (mocked)", async () => {
+    const mf = new Miniflare({
+      scriptPath: "src/index.js",
+      compatibilityDate: "2024-04-20",
+      bindings: {},
+      modules: true,
+      globals: {
+        fetch: async (url, options) => {
+          return new Response(JSON.stringify({ mock: true, url }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        },
+      },
+    });
+
+    const url = `http://localhost?Date=1404-01-31&Destination=esfahan&Origin=tehran`;
+    const res = await mf.dispatchFetch(url);
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.mock).toBe(true);
+  });
 });

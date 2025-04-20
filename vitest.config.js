@@ -7,5 +7,15 @@ export default defineWorkersConfig({
 				wrangler: { configPath: './wrangler.jsonc' },
 			},
 		},
+		deps: {
+			// 👇 This tells Vite to inline the deps (like miniflare) instead of trying to resolve "node:*"
+			inline: ['miniflare'],
+		},
+	},
+	resolve: {
+		alias: {
+		  'node:crypto': 'crypto',
+		  'node:assert': 'assert',
+		},
 	},
 });

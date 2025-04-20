@@ -6,7 +6,7 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "safar724crawler",
 	"main": "src/index.js",
-	"compatibility_date": "2025-04-20",
+	"compatibility_date": "2024-04-20",
 	"observability": {
 		"enabled": true
 	}

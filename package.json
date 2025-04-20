@@ -10,7 +10,14 @@
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.7.5",
+		"@miniflare/core": "^2.14.4",
+		"miniflare": "^3.20250408.0",
+		"undici": "^7.8.0",
 		"vitest": "~3.0.7",
 		"wrangler": "^4.12.0"
+	},
+	"dependencies": {
+		"assert": "^2.1.0",
+		"crypto": "^1.0.1"
 	}
 }
