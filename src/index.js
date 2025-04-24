@@ -21,7 +21,7 @@ export default {
   
 	  const targetUrl = `https://service.safar724.com/buses/api/bus/route?Date=${encodeURIComponent(date)}&Destination=${encodeURIComponent(destination)}&Origin=${encodeURIComponent(origin)}`;
   
-	  const response = await fetch(targetUrl, {
+	  let response = await fetch(targetUrl, {
 		method: "GET",
 		headers: {
 		  "Host": "service.safar724.com",
@@ -40,8 +40,14 @@ export default {
 		  "Priority": "u=1, i"
 		}
 	  });
+
+	  response = await response.json();
+	  response.items = response.items.map(item => {
+		item.buy_link = `https://safar724.com/checkout/${response.originCode}/${response.originEnglishName}/${response.destinationCode}/${response.destinationEnglishName}/${response.date}/${item.id}-${item.destinationCode}#step-reserve`;
+		return item;
+	  });
   
-	  const data = await response.text(); // might be gzipped or plain JSON
+	  const data = JSON.stringify(response); // might be gzipped or plain JSON
 	  return new Response(data, {
 		status: response.status,
 		headers: { "Content-Type": "application/json" }
